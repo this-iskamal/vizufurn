@@ -8,9 +8,13 @@ import {
   SafeAreaView,
   Dimensions,
   ImageBackground,
+  Alert,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/Navigation';
+import { BackendUrl } from '../utils/utils';
+import axios from 'axios';
+
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
@@ -20,9 +24,28 @@ const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-  const handleLogin = () => {
- 
-    console.log('Login with:', phoneNumber);
+
+
+  const handleLogin = async () => {
+    try {
+      const API_URL = `${BackendUrl}api/customer/login`;
+
+      const response = await axios.post(API_URL, {
+        phone: phoneNumber,
+        password,
+      });
+
+      if (response.status === 200) {
+       
+        
+
+        Alert.alert('Success', 'Login Successful');
+        navigation.navigate('Home');  
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'An error occurred';
+      Alert.alert('Error', message);
+    }
   };
 
   return (

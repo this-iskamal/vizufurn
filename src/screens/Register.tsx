@@ -6,11 +6,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   SafeAreaView,
+  Alert,
   Dimensions,
   ImageBackground, 
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/Navigation';
+import axios from 'axios';
+import { BackendUrl } from '../utils/utils';
 
 type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -21,13 +24,29 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
   const [password, setPassword] = useState<string>('');
   const [confirmPassword, setConfirmPassword] = useState<string>('');
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     if (password !== confirmPassword) {
-      console.log('Passwords do not match');
+      Alert.alert('Error', 'Passwords do not match');
       return;
     }
-    // Implement registration logic
-    console.log('Register with:', phoneNumber);
+
+    try {
+   
+      const API_URL = `${BackendUrl}api/customer/register`
+
+      const response = await axios.post(API_URL, {
+        phone: phoneNumber,
+        password:password,
+      });
+
+      if (response.status === 200) {
+        Alert.alert('Success', response.data.message);
+        navigation.navigate('Login');
+      }
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'An error occurred';
+      Alert.alert('Error', message);
+    }
   };
 
   return (
