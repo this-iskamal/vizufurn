@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Text,
@@ -10,37 +10,42 @@ import {
   ImageBackground,
   Alert,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/Navigation';
-import { BackendUrl } from '../utils/utils';
+import {NativeStackScreenProps} from '@react-navigation/native-stack';
+import {RootStackParamList} from '../navigation/Navigation';
+import {BackendUrl} from '../utils/utils';
 import axios from 'axios';
-
+import {useAuthStore} from '../state/authstore';
+import {tokenStorage} from '../state/Storage';
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const { width } = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 
-const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
+const Login: React.FC<LoginScreenProps> = ({navigation}) => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
-
-
   const handleLogin = async () => {
     try {
+      console.log('object')
       const API_URL = `${BackendUrl}api/customer/login`;
 
       const response = await axios.post(API_URL, {
         phone: phoneNumber,
         password,
       });
+  
 
       if (response.status === 200) {
-       
-        
+        const {customer, accessToken, refreshToken} = response.data;
+        tokenStorage.set('accessToken', accessToken);
+        tokenStorage.set('refreshToken', refreshToken);
+
+        const {setUser} = useAuthStore.getState();
+        setUser(customer);
 
         Alert.alert('Success', 'Login Successful');
-        navigation.navigate('Home');  
+        navigation.navigate('Home');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'An error occurred';
@@ -53,12 +58,10 @@ const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
       <ImageBackground
         source={require('../assets/images/login.jpg')}
         style={styles.backgroundImage}
-        resizeMode="cover"
-      >
+        resizeMode="cover">
         <View style={styles.content}>
           <Text style={styles.title}>Login</Text>
           <View style={styles.inputContainer}>
-         
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
               style={styles.input}
@@ -117,10 +120,10 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   label: {
-    fontSize: 18, 
-    fontWeight: '700', 
+    fontSize: 18,
+    fontWeight: '700',
     color: 'black',
-    marginBottom: 8, 
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -137,7 +140,7 @@ const styles = StyleSheet.create({
   loginButton: {
     width: '100%',
     height: 50,
-    backgroundColor: '#1F41BB', 
+    backgroundColor: '#1F41BB',
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 10,
