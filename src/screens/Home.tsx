@@ -1,15 +1,28 @@
-import { View, Text } from 'react-native'
-import React,{FC, useEffect} from 'react'
-import { appAxios } from '../utils/apiinceptor'
-
+import { View, Text, SafeAreaView, StyleSheet } from 'react-native'
+import React,{FC} from 'react'
+import Navbar from '../components/Navbar'
+import Search from '../components/Search'
+import Category from '../components/Category'
+import Carousel from '../components/Carousel'
 
 const Home:FC = () => {
-  
   return (
-    <View>
-      <Text>Home</Text>
-    </View>
+    <SafeAreaView>
+      <View style={styles.container}>
+        <Navbar />
+         <Search />
+         <Category />
+         <Carousel />
+      </View>
+    </SafeAreaView>
   )
 }
+
+const styles = StyleSheet.create({
+  container:{
+    backgroundColor:"#FFFFFF",
+    flexDirection:"column"
+  }
+})
 
 export default Home
