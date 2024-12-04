@@ -23,7 +23,18 @@ export const admin = new AdminJs({
           listProperties: ["email", "role", "isActivated"],
           filterProperties: ["email", "role"],
         },
-      }
+      },
+      {
+        resource: Models.Product,
+      },{
+        resource: Models.Category,
+      },
+      {
+        resource: Models.Order,
+      },
+      {
+        resource: Models.Counter,
+      },
     ],
     branding: {
       companyName: "VizuFurn",
