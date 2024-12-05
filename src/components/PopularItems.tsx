@@ -1,7 +1,44 @@
-import React, { FC } from 'react';
+import axios from 'axios';
+import React, { FC, useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, FlatList, TouchableOpacity } from 'react-native';
+import { BackendUrl } from '../utils/utils';
 
 const PopularItems: FC = () => {
+  interface Product {
+    _id: string;
+    name: string;
+    price: string;
+    image: any; 
+  }
+  
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get(`${BackendUrl}api/products`); // Replace with your actual backend URL
+        setProducts(response.data);
+ 
+        setLoading(false);
+      } catch (error:any) {
+        setError(error.message);
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+
+  }, []);
+
+  if (loading) {
+    return <Text>Loading...</Text>;
+  }
+
+  if (error) {
+    return <Text>Error: {error}</Text>;
+  }
   const popularItems = [
     {
       id: 'sverom-chair',
@@ -29,11 +66,12 @@ const PopularItems: FC = () => {
     },
   ];
 
-  const renderItem = ({ item }: { item: typeof popularItems[0] }) => (
-    <View style={styles.itemContainer}>
-      <Image source={item.image} style={styles.image} />
+  const renderItem = ({ item }: { item: typeof products[0] }) => (
+    <View style={styles.itemContainer} >
+     <Image source={{ uri: item.image }} style={styles.image} />
+
       <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.price}>{item.price}</Text>
+      <Text style={styles.price}>Rs{" "}{item.price}</Text>
     </View>
   );
 
@@ -46,9 +84,9 @@ const PopularItems: FC = () => {
         </TouchableOpacity>
       </View>
       <FlatList
-        data={popularItems}
+        data={products}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         numColumns={2} 
         columnWrapperStyle={styles.row} 
         showsVerticalScrollIndicator={false}
@@ -76,7 +114,7 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     fontSize: 14,
-    color: '#FF8C00', 
+    color: 'tomato', 
     fontWeight: '600',
   },
   listContainer: {
@@ -109,8 +147,9 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   price: {
-    fontSize: 14,
-    color: '#555',
+    fontSize: 20,
+    fontWeight:"800",
+    color: 'black',
     marginTop: 4,
   },
 });

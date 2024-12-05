@@ -1,24 +1,94 @@
-import React, {useEffect, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {tokenStorage} from '../state/Storage';
 import Onboarding from '../screens/Onboarding';
 import Login from '../screens/Login';
 import Register from '../screens/Register';
 import Home from '../screens/Home';
+import Search from '../screens/SearchScreen';
+import Favorites from '../screens/FavouritesScreen';
+import Cart from '../screens/BookmarkScreen';
+import Profile from '../screens/ProfileScreen';
 import {BackendUrl} from '../utils/utils';
 import {appAxios} from '../utils/apiinceptor';
 import {View, StyleSheet} from 'react-native';
 import Loader from '../components/Loader';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
 export type RootStackParamList = {
   Onboarding: undefined;
   Login: undefined;
   Register: undefined;
+  MainApp: undefined;
+};
+
+export type TabParamList = {
   Home: undefined;
+  Search: undefined;
+  Favorites: undefined;
+  Cart: undefined;
+  Profile: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
+const Tab = createBottomTabNavigator<TabParamList>();
+
+const MainTabNavigator:FC = () => {
+  return (
+    <Tab.Navigator
+      screenOptions={({route}) => ({
+        headerShown: false,
+        tabBarIcon: ({focused, color, size}) => {
+          let iconName = '';
+
+          switch (route.name) {
+            case 'Home':
+              iconName = focused ? 'home' : 'home-outline';
+              break;
+            case 'Search':
+              iconName = focused ? 'search' : 'search-outline';
+              break;
+            case 'Favorites':
+              iconName = focused ? 'heart' : 'heart-outline';
+              break;
+            case 'Cart':
+              iconName = focused ? 'cart' : 'cart-outline';
+              break;
+            case 'Profile':
+              iconName = focused ? 'person' : 'person-outline';
+              break;
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: 'tomato',
+        tabBarInactiveTintColor: 'gray',
+        tabBarLabelStyle: {
+          fontSize: 12,
+          marginBottom: -2,
+        },
+        tabBarIconStyle: {
+          marginTop: -5,
+        },
+        tabBarStyle: {
+          height: 60,
+          paddingBottom: 5,
+          paddingTop: 5,
+          backgroundColor: '#f0f0f0',
+          borderTopWidth: 0,
+          elevation: 0,
+        },
+      })}>
+      <Tab.Screen name="Home" component={Home} />
+      <Tab.Screen name="Search" component={Search} />
+      <Tab.Screen name="Favorites" component={Favorites} />
+      <Tab.Screen name="Cart" component={Cart} />
+      <Tab.Screen name="Profile" component={Profile} />
+    </Tab.Navigator>
+  );
+};
 
 const Navigation: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -36,7 +106,7 @@ const Navigation: React.FC = () => {
           );
 
           if (response.data) {
-            setInitialRoute('Home');
+            setInitialRoute('MainApp');
           } else {
             setInitialRoute('Onboarding');
           }
@@ -47,9 +117,7 @@ const Navigation: React.FC = () => {
         console.log('Token validation error:', error);
         setInitialRoute('Onboarding');
       } finally {
-        
-          setIsLoading(false);
-        
+        setIsLoading(false);
       }
     };
 
@@ -72,7 +140,7 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="Onboarding" component={Onboarding} />
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
-        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="MainApp" component={MainTabNavigator} />
       </Stack.Navigator>
     </NavigationContainer>
   );

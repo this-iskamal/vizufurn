@@ -1,36 +1,33 @@
-import React, {FC} from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  TouchableOpacity,
-  Image,
-} from 'react-native';
-
-const categories = [
-  {
-    id: '1',
-    title: 'Chair',
-    image: require('../assets/images/categoryIcons/chair.png'),
-  },
-  {
-    id: '2',
-    title: 'Sofa',
-    image: require('../assets/images/categoryIcons/sofa.png'),
-  },
-  {
-    id: '3',
-    title: 'Desk',
-    image: require('../assets/images/categoryIcons/table.png'),
-  },
-];
+import React, { FC, useEffect, useState } from 'react';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native';
+import axios from 'axios'; 
+import { BackendUrl } from '../utils/utils';
 
 const Category: FC = () => {
-  const renderCategoryItem = ({item}: any) => (
-    <TouchableOpacity style={styles.card}>
-      <Image source={item.image} style={styles.image} />
-      <Text style={styles.cardText}>{item.title}</Text>
+  const [categories, setCategories] = useState<any[]>([]); 
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${BackendUrl}api/categories`); 
+        setCategories(response.data); 
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const renderCategoryItem = ({ item }: any) => (
+    <TouchableOpacity style={styles.card} >
+      {item.image ? (
+        <Image source={{ uri: item.image }} style={styles.image} />
+      ) : (
+        <View style={styles.imageFallback} /> 
+      )}
+
+      <Text style={styles.cardText}>{item.name}</Text>
     </TouchableOpacity>
   );
 
@@ -46,7 +43,7 @@ const Category: FC = () => {
         horizontal
         data={categories}
         renderItem={renderCategoryItem}
-        keyExtractor={item => item.id}
+        keyExtractor={item => item._id}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.listContainer}
       />
@@ -58,7 +55,6 @@ const styles = StyleSheet.create({
   container: {
     marginVertical: 10,
     paddingHorizontal: 20,
-    
   },
   header: {
     flexDirection: 'row',
@@ -73,7 +69,7 @@ const styles = StyleSheet.create({
   },
   seeAll: {
     fontSize: 14,
-    color: '#FF8C00',
+    color: 'tomato',
     fontWeight: '600',
   },
   listContainer: {
@@ -81,30 +77,36 @@ const styles = StyleSheet.create({
   },
   card: {
     width: 125,
-    height: 56, // Keeping the card height to match the image size
+    height: 150, // Increased height to accommodate the text below the image
     backgroundColor: '#f9f9f9',
     borderRadius: 10,
     marginRight: 15,
     overflow: 'hidden',
     elevation: 3,
-    justifyContent: 'flex-end', // Ensures text is aligned at the bottom
-    position: 'relative', // Important for absolute positioning of text
+    justifyContent: 'center', // Ensures content is centered vertically
+    alignItems: 'center', // Centers items horizontally
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: '100%',
+    height: '75%', // Image occupies 75% of the card height
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
-    resizeMode:"cover"
+    resizeMode: 'cover',
+  },
+  imageFallback: {
+    width: '100%',
+    height: '75%', // Placeholder for missing image
+    backgroundColor: '#ddd',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   cardText: {
-    position: 'absolute',
-    bottom: 15,
-    left: 10,
-    fontSize: 21,
+    marginTop: 5, // Adds a small gap between the image and the text
+    fontSize: 16,
     fontWeight: '600',
-
     color: 'black',
+    textAlign: 'center', // Centers the text
   },
 });
 

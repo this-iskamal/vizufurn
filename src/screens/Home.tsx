@@ -1,5 +1,5 @@
-import React, { FC } from 'react';
-import { View, SafeAreaView, StyleSheet, FlatList } from 'react-native';
+import React, {FC} from 'react';
+import {View, SafeAreaView, StyleSheet, FlatList} from 'react-native';
 import Navbar from '../components/Navbar';
 import Search from '../components/Search';
 import Category from '../components/Category';
@@ -20,9 +20,9 @@ const Home: FC = () => {
   return (
     <SafeAreaView style={styles.safeArea}>
       <FlatList
-        data={[{ key: 'content' }]} 
+        data={[{key: 'content'}]}
         renderItem={renderContent}
-        keyExtractor={(item) => item.key}
+        keyExtractor={item => item.key}
         showsVerticalScrollIndicator={false}
       />
     </SafeAreaView>
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
   contentContainer: {
     backgroundColor: '#FFFFFF',
     flexDirection: 'column',
-    paddingBottom: 20, 
+    paddingBottom: 10,
   },
 });
 

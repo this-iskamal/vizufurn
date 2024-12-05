@@ -45,7 +45,7 @@ const Login: React.FC<LoginScreenProps> = ({navigation}) => {
         setUser(customer);
 
         Alert.alert('Success', 'Login Successful');
-        navigation.navigate('Home');
+        navigation.navigate('MainApp');
       }
     } catch (error: any) {
       const message = error.response?.data?.message || 'An error occurred';

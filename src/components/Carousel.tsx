@@ -56,19 +56,19 @@ const styles = StyleSheet.create({
   container: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginVertical: 10,  // Add margin to separate it from the previous component
+    marginVertical: 10, 
     position: 'relative',
     paddingHorizontal:20
   },
   carouselImage: {
     width: '100%',
-    height: 150, // Fixed height for the carousel image
+    height: 150, 
     borderRadius:10,
    
   },
   indicatorContainer: {
     position: 'absolute',
-    bottom: 10,  // Adjust the indicator to sit just above the bottom edge
+    bottom: 10,  
     flexDirection: 'row',
   },
   indicator: {

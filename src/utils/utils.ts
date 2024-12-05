@@ -6,7 +6,9 @@ import axios from 'axios';
 
 export const { width, height } = Dimensions.get('window');
 
+// export const BackendUrl = 'http://4.231.123.0:8002/';
 export const BackendUrl = 'http://192.168.201.47:8002/';
+
 
 
 
