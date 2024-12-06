@@ -3,10 +3,13 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { tokenStorage } from '../state/Storage'; 
 import { useAuthStore } from '../state/authstore';
+import { useCartStore } from '../state/cartStore';
 
 const ProfileScreen = () => {
   const navigation = useNavigation();
   const { setUser } = useAuthStore.getState();
+  const {clearCart} = useCartStore();
+  const {user } = useAuthStore();
 
   const handleLogout = () => {
     Alert.alert(
@@ -21,6 +24,7 @@ const ProfileScreen = () => {
        
             tokenStorage.clearAll();
             setUser(null);
+            clearCart();
             navigation.reset({
               index: 0,
               routes: [{ name: 'Login' as never }], 
@@ -35,6 +39,8 @@ const ProfileScreen = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Profile</Text>
+      <Text style={styles.title}>{user?.name}</Text>
+
       <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
         <Text style={styles.logoutButtonText}>Logout</Text>
       </TouchableOpacity>
