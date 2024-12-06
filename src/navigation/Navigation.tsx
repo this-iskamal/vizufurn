@@ -16,12 +16,24 @@ import {appAxios} from '../utils/apiinceptor';
 import {View, StyleSheet} from 'react-native';
 import Loader from '../components/Loader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import ProductDetail from '../screens/ProductDeatil';
+
+interface Product {
+  _id: string;
+  name: string;
+  price: string;
+  images: string[];
+  description?: string;
+  category: string;
+}
 
 export type RootStackParamList = {
+  
   Onboarding: undefined;
   Login: undefined;
   Register: undefined;
   MainApp: undefined;
+  ProductDetail: { product: Product }; 
 };
 
 export type TabParamList = {
@@ -141,6 +153,7 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
+        <Stack.Screen name="ProductDetail" component={ProductDetail} /> 
       </Stack.Navigator>
     </NavigationContainer>
   );
