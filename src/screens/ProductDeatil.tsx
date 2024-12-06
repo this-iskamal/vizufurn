@@ -4,16 +4,17 @@ import {
   Text,
   Image,
   StyleSheet,
-
   TouchableOpacity,
   Modal,
   FlatList,
   Dimensions,
+  Alert,
 } from 'react-native';
 import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../navigation/Navigation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimilarProducts from '../components/SimilarProducts';
+import {useCartStore} from '../state/cartStore';
 
 type ProductDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -34,12 +35,42 @@ const ProductDetail: FC<ProductDetailProps> = () => {
   const [showGallery, setShowGallery] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     if (route.params?.product) {
       setProduct(route.params.product);
     }
   }, [route.params?.product]);
+  const {items, addToCart} = useCartStore();
+
+  const handleAddToCart = () => {
+    
+
+    const existingItem = items.find(item => item._id === product._id);
+
+    if (existingItem) {
+      Alert.alert(`${product.name} is already in the cart.`);
+    } else {
+      addToCart({
+        _id: product._id,
+        name: product.name,
+        price: product.price,
+        image: product.images[0],
+        quantity: quantity,
+      });
+    }
+  };
+
+  const increaseQuantity = () => {
+    setQuantity(prevQuantity => prevQuantity + 1);
+  };
+
+  const decreaseQuantity = () => {
+    if (quantity > 1) {
+      setQuantity(prevQuantity => prevQuantity - 1);
+    }
+  };
 
   const openGallery = (index: number) => {
     setCurrentIndex(index);
@@ -58,13 +89,11 @@ const ProductDetail: FC<ProductDetailProps> = () => {
 
   return (
     <View style={styles.container}>
- 
       <FlatList
         data={[]}
         renderItem={() => null}
         ListHeaderComponent={
           <>
-         
             <View style={styles.imageContainer}>
               <Image source={{uri: product.images[0]}} style={styles.image} />
               <TouchableOpacity
@@ -76,10 +105,10 @@ const ProductDetail: FC<ProductDetailProps> = () => {
               </TouchableOpacity>
             </View>
 
-          
             <View style={[styles.detailContainer, styles.roundedTop]}>
               <Text style={styles.name}>{product.name}</Text>
               <Text style={styles.price}>Rs {product.price}</Text>
+
               <View style={styles.ratingContainer}>
                 <Ionicons name="star" size={16} color="gold" />
                 <Text style={styles.rating}>4.6</Text>
@@ -107,9 +136,29 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                 )}
               </View>
 
-              <TouchableOpacity style={styles.buttonContainer}>
-                <Text style={styles.addToCartText}>Add to Cart</Text>
-              </TouchableOpacity>
+              <View style={styles.buttonRowContainer}>
+                <View style={styles.quantityContainer}>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={decreaseQuantity}>
+                    <Ionicons name="remove" size={20} color="tomato" />
+                  </TouchableOpacity>
+                  <Text style={styles.quantityText}>{quantity}</Text>
+                  <TouchableOpacity
+                    style={styles.quantityButton}
+                    onPress={increaseQuantity}>
+                    <Ionicons name="add" size={20} color="tomato" />
+                  </TouchableOpacity>
+                </View>
+                <TouchableOpacity
+                  style={styles.addToCartButtonContainer}
+                  onPress={handleAddToCart}>
+                  <Text style={styles.addToCartText}>Add to Cart</Text>
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.cameraIconButton}>
+                  <Ionicons name="camera" size={24} color="white" />
+                </TouchableOpacity>
+              </View>
             </View>
           </>
         }
@@ -124,7 +173,6 @@ const ProductDetail: FC<ProductDetailProps> = () => {
         showsVerticalScrollIndicator={false}
       />
 
-     
       <Modal visible={showGallery} transparent={true} animationType="fade">
         <View style={styles.galleryModal}>
           <TouchableOpacity
@@ -173,6 +221,27 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.3)',
     borderRadius: 8,
   },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  quantityButton: {
+    backgroundColor: 'white',
+    padding: 2,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderColor: 'tomato',
+    borderWidth: 1,
+  },
+  quantityText: {
+    fontSize: 14,
+    color: 'black',
+    fontWeight: 'bold',
+    marginHorizontal: 10,
+  },
+
   detailContainer: {
     padding: 20,
     backgroundColor: 'white',
@@ -202,12 +271,25 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   seeMoreText: {fontSize: 14, color: 'blue', fontWeight: 'bold'},
-  buttonContainer: {
+  buttonRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 20,
+    justifyContent: 'space-between',
+  },
+  addToCartButtonContainer: {
     backgroundColor: 'tomato',
     paddingVertical: 12,
     alignItems: 'center',
     borderRadius: 8,
-    marginTop: 20,
+    flex: 0.9,
+  },
+  cameraIconButton: {
+    backgroundColor: 'tomato',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   addToCartText: {color: 'white', fontSize: 16, fontWeight: 'bold'},
   galleryModal: {
