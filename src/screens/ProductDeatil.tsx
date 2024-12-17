@@ -15,6 +15,7 @@ import {RootStackParamList} from '../navigation/Navigation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimilarProducts from '../components/SimilarProducts';
 import {useCartStore} from '../state/cartStore';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type ProductDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -31,7 +32,8 @@ const ProductDetail: FC<ProductDetailProps> = () => {
   const route = useRoute<ProductDetailScreenRouteProp>();
   const {product: initialProduct} = route.params;
   const [product, setProduct] = useState(initialProduct);
-  const navigation = useNavigation();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [showGallery, setShowGallery] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
@@ -45,8 +47,6 @@ const ProductDetail: FC<ProductDetailProps> = () => {
   const {items, addToCart} = useCartStore();
 
   const handleAddToCart = () => {
-    
-
     const existingItem = items.find(item => item._id === product._id);
 
     if (existingItem) {
@@ -101,7 +101,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                 onPress={() =>
                   navigation.reset({routes: [{name: 'MainApp' as never}]})
                 }>
-                <Ionicons name="arrow-back" size={24} color="white" />
+                <Ionicons name="home" size={24} color="white" />
               </TouchableOpacity>
             </View>
 
@@ -155,7 +155,9 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                   onPress={handleAddToCart}>
                   <Text style={styles.addToCartText}>Add to Cart</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={styles.cameraIconButton}>
+                <TouchableOpacity
+                  style={styles.cameraIconButton}
+                  onPress={() => navigation.navigate('ARView', {product})}>
                   <Ionicons name="camera" size={24} color="white" />
                 </TouchableOpacity>
               </View>

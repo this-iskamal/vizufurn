@@ -1,8 +1,24 @@
-import React, { FC } from 'react';
-import { View, TextInput, StyleSheet } from 'react-native';
+import React, { FC, useState } from 'react';
+import { View, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { useNavigation } from '@react-navigation/native';
+import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
+import { TabParamList } from '../navigation/Navigation';
+
+type NavigationProp = BottomTabNavigationProp<TabParamList, 'Search'>;
 
 const Search: FC = () => {
+  const navigation = useNavigation<NavigationProp>();
+  const [searchQuery, setSearchQuery] = useState<string>(''); // State to hold search input
+
+  const handleNavigate = () => {
+    if (searchQuery.trim().length > 0) {
+      navigation.navigate('Search', { query: searchQuery }); // Pass searchQuery as a parameter
+    } else {
+      Alert.alert('Please enter a search query.'); // Inform user if input is empty
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.searchContainer}>
@@ -11,6 +27,9 @@ const Search: FC = () => {
           style={styles.input}
           placeholder="Chair, desk, lamp, etc"
           placeholderTextColor="#aaa"
+          value={searchQuery}
+          onChangeText={setSearchQuery} // Update state on text change
+          onSubmitEditing={handleNavigate} // Navigate on submit
         />
       </View>
     </View>

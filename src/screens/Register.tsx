@@ -8,12 +8,13 @@ import {
   SafeAreaView,
   Alert,
   Dimensions,
-  ImageBackground, 
+  ImageBackground,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/Navigation';
 import axios from 'axios';
 import { BackendUrl } from '../utils/utils';
+import ReusableButton from '../components/ReusableButton'; // Import the ReusableButton component
 
 type RegisterScreenProps = NativeStackScreenProps<RootStackParamList, 'Register'>;
 
@@ -31,12 +32,11 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
     }
 
     try {
-   
-      const API_URL = `${BackendUrl}api/customer/register`
+      const API_URL = `${BackendUrl}api/customer/register`;
 
       const response = await axios.post(API_URL, {
         phone: phoneNumber,
-        password:password,
+        password: password,
       });
 
       if (response.status === 200) {
@@ -52,12 +52,16 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ImageBackground
-        source={require('../assets/images/login.jpg')} 
         style={styles.backgroundImage}
         resizeMode="cover"
       >
+        {/* Background Overlay */}
+        <View style={styles.overlay} />
+
+        {/* Content without animation */}
         <View style={styles.content}>
           <Text style={styles.title}>Register</Text>
+
           <View style={styles.inputContainer}>
             {/* Label for Phone Number */}
             <Text style={styles.label}>Phone Number</Text>
@@ -67,7 +71,9 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
+              placeholderTextColor="gray"
             />
+
             {/* Label for Password */}
             <Text style={styles.label}>Password</Text>
             <TextInput
@@ -76,7 +82,9 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              placeholderTextColor="gray"
             />
+
             {/* Label for Confirm Password */}
             <Text style={styles.label}>Confirm Password</Text>
             <TextInput
@@ -85,14 +93,13 @@ const Register: React.FC<RegisterScreenProps> = ({ navigation }) => {
               secureTextEntry
               value={confirmPassword}
               onChangeText={setConfirmPassword}
+              placeholderTextColor="gray"
             />
-            <TouchableOpacity
-              style={styles.registerButton}
-              onPress={handleRegister}
-            >
-              <Text style={styles.registerButtonText}>Register</Text>
-            </TouchableOpacity>
+
+            {/* Reusable Register Button */}
+            <ReusableButton title="Register" onPress={handleRegister} />
           </View>
+
           <View style={styles.loginContainer}>
             <Text style={styles.loginText}>Already have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Login')}>
@@ -114,26 +121,31 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: width * 0.1,
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
-    marginTop: -50, 
+    marginTop: -50,
+    alignItems: 'center',
   },
   title: {
-    fontSize: 40, 
+    fontSize: 40,
     fontWeight: '700',
-    color: '#fff', 
+    color: 'black',
     marginBottom: 20,
-    textAlign: 'center', 
+    textAlign: 'center',
   },
   inputContainer: {
     width: '100%',
   },
   label: {
-    fontSize: 18, 
-    fontWeight: '700', 
-    color: 'black', 
-    marginBottom: 8, 
+    fontSize: 18,
+    fontWeight: '700',
+    color: 'black',
+    marginBottom: 8,
   },
   input: {
     width: '100%',
@@ -145,7 +157,7 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     fontSize: 16,
     color: 'black',
-    backgroundColor: 'rgba(255, 255, 255, 0.7)', 
+    backgroundColor: 'rgba(255, 255, 255, 0.7)', // Semi-transparent background
   },
   registerButton: {
     width: '100%',
@@ -167,7 +179,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   loginText: {
-    color: 'black', 
+    color: 'black',
   },
   loginLink: {
     color: '#1F41BB',

@@ -17,7 +17,7 @@ const PopularItems: FC = () => {
   interface Product {
     _id: string;
     name: string;
-    price: string;
+    price: number;
     images: string[];
     description?: string;
     category: string;

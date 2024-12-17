@@ -17,6 +17,7 @@ import {View, StyleSheet} from 'react-native';
 import Loader from '../components/Loader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProductDetail from '../screens/ProductDeatil';
+import ARView from '../screens/ARView';
 
 interface Product {
   _id: string;
@@ -34,11 +35,12 @@ export type RootStackParamList = {
   Register: undefined;
   MainApp: undefined;
   ProductDetail: { product: Product }; 
+  ARView: { product: Product };
 };
 
 export type TabParamList = {
   Home: undefined;
-  Search: undefined;
+  Search: { query: string };
   Favorites: undefined;
   Cart: undefined;
   Profile: undefined;
@@ -154,6 +156,7 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
         <Stack.Screen name="ProductDetail" component={ProductDetail} /> 
+        <Stack.Screen name="ARView" component={ARView} />
       </Stack.Navigator>
     </NavigationContainer>
   );

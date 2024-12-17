@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -10,38 +10,37 @@ import {
   ImageBackground,
   Alert,
 } from 'react-native';
-import {NativeStackScreenProps} from '@react-navigation/native-stack';
-import {RootStackParamList} from '../navigation/Navigation';
-import {BackendUrl} from '../utils/utils';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/Navigation';
+import { BackendUrl } from '../utils/utils';
 import axios from 'axios';
-import {useAuthStore} from '../state/authstore';
-import {tokenStorage} from '../state/Storage';
+import { useAuthStore } from '../state/authstore';
+import { tokenStorage } from '../state/Storage';
+import ReusableButton from '../components/ReusableButton'; // Import ReusableButton
 
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
-const {width} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
-const Login: React.FC<LoginScreenProps> = ({navigation}) => {
+const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
   const [phoneNumber, setPhoneNumber] = useState<string>('');
   const [password, setPassword] = useState<string>('');
 
   const handleLogin = async () => {
     try {
-      console.log('object')
       const API_URL = `${BackendUrl}api/customer/login`;
 
       const response = await axios.post(API_URL, {
         phone: phoneNumber,
         password,
       });
-  
 
       if (response.status === 200) {
-        const {customer, accessToken, refreshToken} = response.data;
+        const { customer, accessToken, refreshToken } = response.data;
         tokenStorage.set('accessToken', accessToken);
         tokenStorage.set('refreshToken', refreshToken);
 
-        const {setUser} = useAuthStore.getState();
+        const { setUser } = useAuthStore.getState();
         setUser(customer);
 
         Alert.alert('Success', 'Login Successful');
@@ -55,12 +54,14 @@ const Login: React.FC<LoginScreenProps> = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ImageBackground
-        source={require('../assets/images/login.jpg')}
-        style={styles.backgroundImage}
-        resizeMode="cover">
+      <ImageBackground style={styles.backgroundImage} resizeMode="cover">
+        {/* Background Overlay */}
+        <View style={styles.overlay} />
+
+        {/* Content without animation */}
         <View style={styles.content}>
           <Text style={styles.title}>Login</Text>
+
           <View style={styles.inputContainer}>
             <Text style={styles.label}>Phone Number</Text>
             <TextInput
@@ -69,7 +70,9 @@ const Login: React.FC<LoginScreenProps> = ({navigation}) => {
               keyboardType="phone-pad"
               value={phoneNumber}
               onChangeText={setPhoneNumber}
+              placeholderTextColor="gray"
             />
+
             {/* Label for Password */}
             <Text style={styles.label}>Password</Text>
             <TextInput
@@ -78,11 +81,13 @@ const Login: React.FC<LoginScreenProps> = ({navigation}) => {
               secureTextEntry
               value={password}
               onChangeText={setPassword}
+              placeholderTextColor="gray"
             />
-            <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
-              <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
+
+            {/* Reusable Button */}
+            <ReusableButton title="Login" onPress={handleLogin} />
           </View>
+
           <View style={styles.registerContainer}>
             <Text style={styles.registerText}>Don't have an account? </Text>
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
@@ -104,15 +109,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: width * 0.1,
   },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+
+  },
   content: {
     flex: 1,
     justifyContent: 'center',
     marginTop: -100,
+    alignItems: 'center',
   },
   title: {
     fontSize: 36,
     fontWeight: '800',
-    color: 'white',
+    color: 'black',
     marginBottom: 30,
     textAlign: 'center',
   },
@@ -156,7 +166,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   registerText: {
-    color: '#1F1F1F',
+    color: 'black',
   },
   registerLink: {
     color: '#1F41BB',
