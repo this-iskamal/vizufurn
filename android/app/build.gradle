@@ -114,6 +114,8 @@ android {
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
+    implementation project(':react-native-webview')
+    implementation project(':react-native-html-to-pdf')
     implementation("com.facebook.react:react-android")
     implementation fileTree(dir: "libs", include: ["*.jar"])
   //noinspection GradleDynamicVersion

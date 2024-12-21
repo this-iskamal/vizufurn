@@ -1,20 +1,35 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, FlatList } from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  FlatList,
+} from 'react-native';
 
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { useCartStore } from '../state/cartStore';
+import {useCartStore} from '../state/cartStore';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/Navigation';
 
 const Cart = () => {
-
-  const { items, totalPrice, updateQuantity, removeFromCart, clearCart } = useCartStore();
+  const {items, totalPrice, updateQuantity, removeFromCart, clearCart} =
+    useCartStore();
+    const navigation =
+        useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const handleRemove = (itemId: string) => {
     removeFromCart(itemId);
   };
 
-  const handleQuantityChange = (itemId: string, operation: 'increment' | 'decrement') => {
+  const handleQuantityChange = (
+    itemId: string,
+    operation: 'increment' | 'decrement',
+  ) => {
     const newQuantity = operation === 'increment' ? 1 : -1;
-    const item = items.find((item) => item._id === itemId);
+    const item = items.find(item => item._id === itemId);
     if (item) {
       updateQuantity(itemId, item.quantity + newQuantity);
     }
@@ -24,35 +39,39 @@ const Cart = () => {
     clearCart();
   };
 
+  
+  const handlePayment = () => {
+    navigation.navigate('Payment', { totalPrice, items });
+  }
+
   return (
     <View style={styles.container}>
-    
       <View style={styles.header}>
         <Text style={styles.title}>Your Cart</Text>
-        <TouchableOpacity onPress={handleEmptyCart} style={styles.emptyCartButton}>
+        <TouchableOpacity
+          onPress={handleEmptyCart}
+          style={styles.emptyCartButton}>
           <Ionicons name="trash-bin-outline" size={24} color="tomato" />
         </TouchableOpacity>
       </View>
 
-
-
       <FlatList
         data={items}
-        keyExtractor={(item) => item._id}
-        renderItem={({ item }) => (
+        keyExtractor={item => item._id}
+        renderItem={({item}) => (
           <View style={styles.itemContainer}>
-            <Image source={{ uri: item.image }} style={styles.image} />
+            <Image source={{uri: item.image}} style={styles.image} />
             <View style={styles.itemDetails}>
               <Text style={styles.name}>{item.name}</Text>
               <View style={styles.quantityContainer}>
                 <TouchableOpacity
                   onPress={() => handleQuantityChange(item._id, 'decrement')}
-                  disabled={item.quantity === 1}
-                >
+                  disabled={item.quantity === 1}>
                   <Text style={styles.quantityButton}>-</Text>
                 </TouchableOpacity>
                 <Text style={styles.quantity}>{item.quantity}</Text>
-                <TouchableOpacity onPress={() => handleQuantityChange(item._id, 'increment')}>
+                <TouchableOpacity
+                  onPress={() => handleQuantityChange(item._id, 'increment')}>
                   <Text style={styles.quantityButton}>+</Text>
                 </TouchableOpacity>
               </View>
@@ -64,12 +83,14 @@ const Cart = () => {
           </View>
         )}
       />
-      
-  
+
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total</Text>
         <Text style={styles.totalPrice}>Rs {totalPrice}</Text>
       </View>
+      <TouchableOpacity style={styles.paymentButton} onPress={handlePayment}>
+        <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -81,7 +102,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 16,
   },
-
+  paymentButton: {
+    backgroundColor: 'tomato',
+    paddingVertical: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  paymentButtonText: {
+    color: 'white',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -147,7 +179,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     padding: 8,
     color: 'tomato',
- 
   },
   totalContainer: {
     flexDirection: 'row',

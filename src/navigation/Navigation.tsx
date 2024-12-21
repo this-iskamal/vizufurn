@@ -18,6 +18,9 @@ import Loader from '../components/Loader';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ProductDetail from '../screens/ProductDeatil';
 import ARView from '../screens/ARView';
+import PaymentScreen from '../screens/PaymentScreen';
+import PaymentSuccess from '../screens/PaymentSuccess';
+import PaymentFailure from '../screens/PaymentFailure';
 
 interface Product {
   _id: string;
@@ -36,6 +39,10 @@ export type RootStackParamList = {
   MainApp: undefined;
   ProductDetail: { product: Product }; 
   ARView: { product: Product };
+  Payment: { totalPrice: number; items: Product[] };
+  PaymentSuccess:{transactionDetails:string,purchasedItems:any}
+  PaymentFailure:{errorDetails:string}
+
 };
 
 export type TabParamList = {
@@ -157,6 +164,9 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
         <Stack.Screen name="ProductDetail" component={ProductDetail} /> 
         <Stack.Screen name="ARView" component={ARView} />
+        <Stack.Screen name="Payment" component={PaymentScreen} />
+        <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
+        <Stack.Screen name="PaymentFailure" component={PaymentFailure} />
       </Stack.Navigator>
     </NavigationContainer>
   );

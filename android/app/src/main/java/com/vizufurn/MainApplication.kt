@@ -11,6 +11,8 @@ import com.facebook.react.defaults.DefaultReactHost.getDefaultReactHost
 import com.facebook.react.defaults.DefaultReactNativeHost
 import com.facebook.react.soloader.OpenSourceMergedSoMapping
 import com.facebook.soloader.SoLoader
+import com.reactnativecommunity.webview.RNCWebViewPackage;
+import com.christopherdro.htmltopdf.RNHTMLtoPDFPackage;
 
 class MainApplication : Application(), ReactApplication {
 
@@ -21,6 +23,8 @@ class MainApplication : Application(), ReactApplication {
               // Packages that cannot be autolinked yet can be added manually here, for example:
               // add(MyReactNativePackage())
                add(ReactViroPackage(ReactViroPackage.ViroPlatform.valueOf("AR")))
+               add(RNCWebViewPackage())
+               add(RNHTMLtoPDFPackage())
             }
 
         override fun getJSMainModuleName(): String = "index"
