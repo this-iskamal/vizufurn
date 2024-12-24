@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import axios from 'axios';
 import {useNavigation} from '@react-navigation/native';
-import {BackendUrl} from '../utils/utils'; 
+import {BackendUrl} from '../utils/utils';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {RootStackParamList} from '../navigation/Navigation';
 
@@ -30,8 +30,9 @@ const SimilarProduct: React.FC<SimilarProductProps> = ({
     const fetchSimilarProducts = async () => {
       try {
         const response = await axios.get(
-          `${BackendUrl}api/products?category=${category}`,
+          `${BackendUrl}api/products/${category}`,
         );
+       
         const filteredProducts = response.data.filter(
           (item: any) => item._id !== currentitem,
         );

@@ -21,6 +21,9 @@ import ARView from '../screens/ARView';
 import PaymentScreen from '../screens/PaymentScreen';
 import PaymentSuccess from '../screens/PaymentSuccess';
 import PaymentFailure from '../screens/PaymentFailure';
+import { EditProfileScreen } from '../screens/EditProfileScreen';
+import OrderHistoryScreen from '../screens/OrderHistoryScreen';
+import SettingsScreen from '../screens/SettingsScreen';
 
 interface Product {
   _id: string;
@@ -32,22 +35,23 @@ interface Product {
 }
 
 export type RootStackParamList = {
-  
   Onboarding: undefined;
   Login: undefined;
   Register: undefined;
   MainApp: undefined;
-  ProductDetail: { product: Product }; 
-  ARView: { product: Product };
-  Payment: { totalPrice: number; items: Product[] };
-  PaymentSuccess:{transactionDetails:string,purchasedItems:any}
-  PaymentFailure:{errorDetails:string}
-
+  ProductDetail: {product: Product};
+  ARView: {product: Product};
+  Payment: {totalPrice: number; items: Product[]};
+  PaymentSuccess: {transactionDetails: string; purchasedItems: any};
+  PaymentFailure: {errorDetails: string};
+  EditProfile: undefined;
+  OrderHistory: undefined;
+  Settings: undefined;
 };
 
 export type TabParamList = {
   Home: undefined;
-  Search: { query: string };
+  Search: {query: string};
   Favorites: undefined;
   Cart: undefined;
   Profile: undefined;
@@ -56,7 +60,7 @@ export type TabParamList = {
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<TabParamList>();
 
-const MainTabNavigator:FC = () => {
+const MainTabNavigator: FC = () => {
   return (
     <Tab.Navigator
       screenOptions={({route}) => ({
@@ -162,11 +166,14 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
-        <Stack.Screen name="ProductDetail" component={ProductDetail} /> 
+        <Stack.Screen name="ProductDetail" component={ProductDetail} />
         <Stack.Screen name="ARView" component={ARView} />
         <Stack.Screen name="Payment" component={PaymentScreen} />
         <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
         <Stack.Screen name="PaymentFailure" component={PaymentFailure} />
+        <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+        <Stack.Screen name="OrderHistory" component={OrderHistoryScreen} />
+        <Stack.Screen name="Settings" component={SettingsScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );
