@@ -7,13 +7,10 @@ import {
   TouchableOpacity,
   FlatList,
   ListRenderItem,
-  Alert,
 } from 'react-native';
 import {useRoute, useNavigation, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuthStore} from '../state/authstore';
-import Ionicons from 'react-native-vector-icons/Ionicons';
-
 
 // Define interfaces for our data structures
 interface PurchasedItem {
@@ -34,6 +31,7 @@ interface TransactionQueryParams {
 interface RouteParams {
   transactionDetails: string;
   purchasedItems: PurchasedItem[];
+  orderId: string;
 }
 
 // Define the navigation param list type
@@ -55,7 +53,7 @@ const PaymentSuccess: React.FC = () => {
   const {user} = useAuthStore();
   const route = useRoute<PaymentSuccessRouteProp>();
   const navigation = useNavigation<NavigationProp>();
-  const {transactionDetails, purchasedItems} = route.params;
+  const {transactionDetails, purchasedItems, orderId} = route.params;
 
   const getQueryParams = (url: string): TransactionQueryParams => {
     const params: {[key: string]: string} = {};
@@ -105,52 +103,54 @@ const PaymentSuccess: React.FC = () => {
 
   const transactionDetailsData = [
     {title: 'Reference ID', value: refId},
-    {title: 'Order ID', value: oid},
-    {title: 'Customer Name', value: user?.phone ?? 'N/A'},
+    {title: 'Order ID', value: orderId},
+    {title: 'Customer Name', value: user?.name ?? user},
     {title: 'Customer Address', value: user?.address ?? 'N/A'},
     {title: 'Amount', value: `$${amt}`},
   ];
+
+  const renderMainContent: ListRenderItem<{key: string}> = ({item}) => {
+    if (item.key === 'transactionDetails') {
+      return (
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Transaction Details:</Text>
+          <FlatList
+            data={transactionDetailsData}
+            renderItem={renderTransactionItem}
+            keyExtractor={item => item.title}
+            scrollEnabled={false}
+          />
+        </View>
+      );
+    }
+
+    if (item.key === 'purchasedItems') {
+      return (
+        <View style={styles.sectionContainer}>
+          <Text style={styles.sectionTitle}>Purchased Items:</Text>
+          <FlatList
+            data={purchasedItems}
+            renderItem={renderPurchasedItem}
+            keyExtractor={item => item._id}
+            scrollEnabled={false}
+          />
+          <View style={styles.totalRow}>
+            <Text style={styles.totalLabel}>Grand Total:</Text>
+            <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
+          </View>
+        </View>
+      );
+    }
+
+    return null;
+  };
 
   return (
     <FlatList
       data={[{key: 'transactionDetails'}, {key: 'purchasedItems'}]}
       keyExtractor={item => item.key}
       contentContainerStyle={styles.container}
-      renderItem={({item}) => {
-        if (item.key === 'transactionDetails') {
-          return (
-            <View style={styles.sectionContainer}>
-            
-                <Text style={styles.sectionTitle}>Transaction Details: </Text>
-                
-              <FlatList
-                data={transactionDetailsData}
-                renderItem={renderTransactionItem}
-                keyExtractor={item => item.title}
-              />
-            </View>
-          );
-        }
-
-        if (item.key === 'purchasedItems') {
-          return (
-            <View style={styles.sectionContainer}>
-              <Text style={styles.sectionTitle}>Purchased Items:</Text>
-              <FlatList
-                data={purchasedItems}
-                renderItem={renderPurchasedItem}
-                keyExtractor={item => item._id}
-              />
-              <View style={styles.totalRow}>
-                <Text style={styles.totalLabel}>Grand Total:</Text>
-                <Text style={styles.totalValue}>${grandTotal.toFixed(2)}</Text>
-              </View>
-            </View>
-          );
-        }
-
-        return null;
-      }}
+      renderItem={renderMainContent}
       ListHeaderComponent={
         <>
           <Image
@@ -178,10 +178,8 @@ const PaymentSuccess: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: '#f8f8f8',
-    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#f8f8f8',
   },
   successImage: {
     width: 120,
@@ -200,11 +198,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#555',
     textAlign: 'center',
-    alignSelf: 'center',
     marginBottom: 20,
   },
   sectionContainer: {
-    width: '100%',
     backgroundColor: '#fff',
     borderRadius: 10,
     padding: 15,
@@ -262,6 +258,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
     borderRadius: 5,
     marginTop: 10,
+    alignSelf: 'center',
   },
   buttonText: {
     fontSize: 16,

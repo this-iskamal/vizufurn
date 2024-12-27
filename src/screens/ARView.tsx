@@ -30,7 +30,7 @@ const InitialScene = () => {
           position={[0, 0, 0]} // Relative position on the plane
           scale={[0.2, 0.2, 0.2]} // Fixed scale
           source={require('../assets/stool/WoodenStool.obj')}
-          resources={[require('../assets/stool/WoodenStool.mtl')]}
+          resources={[require('../assets/stool/WoodenStool1.mtl')]}
           type="OBJ"
           materials={['grid']}
         />

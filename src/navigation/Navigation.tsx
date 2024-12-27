@@ -24,6 +24,7 @@ import PaymentFailure from '../screens/PaymentFailure';
 import { EditProfileScreen } from '../screens/EditProfileScreen';
 import OrderHistoryScreen from '../screens/OrderHistoryScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import CategorySection from '../screens/CategorySection';
 
 interface Product {
   _id: string;
@@ -42,11 +43,12 @@ export type RootStackParamList = {
   ProductDetail: {product: Product};
   ARView: {product: Product};
   Payment: {totalPrice: number; items: Product[]};
-  PaymentSuccess: {transactionDetails: string; purchasedItems: any};
+  PaymentSuccess: {transactionDetails: string; purchasedItems: any,orderId:string};
   PaymentFailure: {errorDetails: string};
   EditProfile: undefined;
   OrderHistory: undefined;
   Settings: undefined;
+  CategorySection: {category: any};
 };
 
 export type TabParamList = {
@@ -75,9 +77,9 @@ const MainTabNavigator: FC = () => {
             case 'Search':
               iconName = focused ? 'search' : 'search-outline';
               break;
-            case 'Favorites':
-              iconName = focused ? 'heart' : 'heart-outline';
-              break;
+            // case 'Favorites':
+            //   iconName = focused ? 'heart' : 'heart-outline';
+            //   break;
             case 'Cart':
               iconName = focused ? 'cart' : 'cart-outline';
               break;
@@ -108,7 +110,7 @@ const MainTabNavigator: FC = () => {
       })}>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Search" component={Search} />
-      <Tab.Screen name="Favorites" component={Favorites} />
+      {/* <Tab.Screen name="Favorites" component={Favorites} /> */}
       <Tab.Screen name="Cart" component={Cart} />
       <Tab.Screen name="Profile" component={Profile} />
     </Tab.Navigator>
@@ -168,6 +170,8 @@ const Navigation: React.FC = () => {
         <Stack.Screen name="MainApp" component={MainTabNavigator} />
         <Stack.Screen name="ProductDetail" component={ProductDetail} />
         <Stack.Screen name="ARView" component={ARView} />
+        <Stack.Screen name="CategorySection" component={CategorySection} />
+
         <Stack.Screen name="Payment" component={PaymentScreen} />
         <Stack.Screen name="PaymentSuccess" component={PaymentSuccess} />
         <Stack.Screen name="PaymentFailure" component={PaymentFailure} />

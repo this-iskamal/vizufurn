@@ -1,11 +1,12 @@
-import React from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
 import { WebView, WebViewNavigation } from 'react-native-webview';
 import { useRoute, useNavigation, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import axios from 'axios'; // Add this for making HTTP requests
 import { RootStackParamList } from '../navigation/Navigation';
 import { BackendUrl } from '../utils/utils';
-
+import { appAxios } from '../utils/apiinceptor';
 
 // Define interfaces for our data structures
 interface PurchasedItem {
@@ -55,6 +56,7 @@ const PaymentScreen: React.FC = () => {
   const route = useRoute<PaymentScreenRouteProp>();
   const navigation = useNavigation<PaymentScreenNavigationProp>();
   const { totalPrice, items } = route.params;
+  const [loading, setLoading] = useState(false);
 
   const esewaURL: string = 'https://uat.esewa.com.np/epay/main';
   const successURL: string = `${BackendUrl}api/payment-success`;
@@ -80,12 +82,35 @@ const PaymentScreen: React.FC = () => {
 
   const paymentURL: string = `${esewaURL}?${generateQueryParams(paymentData)}`;
 
+  const handleSuccessfulTransaction = async (transactionDetails: string) => {
+    setLoading(true);
+    try {
+      const response = await appAxios.post(`${BackendUrl}api/order`, {
+        items,
+        totalPrice,
+      });
+     
+
+      if (response.status === 201) {
+        navigation.navigate('PaymentSuccess', {
+          transactionDetails,
+          purchasedItems: items,
+          orderId:response.data.orderId
+        });
+      } else {
+        throw new Error('Failed to save order history');
+      }
+    } catch (error) {
+      Alert.alert('Error', 'Failed to save order history');
+      console.log(error)
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleNavigationStateChange = (navState: WebViewNavigation): void => {
     if (navState.url.startsWith(successURL)) {
-      navigation.navigate('PaymentSuccess', {
-        transactionDetails: navState.url,
-        purchasedItems: items,
-      });
+      handleSuccessfulTransaction(navState.url);
     } else if (navState.url.startsWith(failureURL)) {
       navigation.navigate('PaymentFailure', {
         errorDetails: navState.url,
@@ -95,12 +120,16 @@ const PaymentScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <WebView
-        source={{ uri: paymentURL }}
-        startInLoadingState={true}
-        renderLoading={() => <ActivityIndicator size="large" color="#0000ff" />}
-        onNavigationStateChange={handleNavigationStateChange}
-      />
+      {loading ? (
+        <ActivityIndicator size="large" color="#0000ff" />
+      ) : (
+        <WebView
+          source={{ uri: paymentURL }}
+          startInLoadingState={true}
+          renderLoading={() => <ActivityIndicator size="large" color="#0000ff" />}
+          onNavigationStateChange={handleNavigationStateChange}
+        />
+      )}
     </View>
   );
 };
