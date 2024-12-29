@@ -35,6 +35,9 @@ export const admin = new AdminJs({
       {
         resource: Models.Counter,
       },
+      {
+        resource: Models.Object3D,
+      }
     ],
     branding: {
       companyName: "VizuFurn",
@@ -53,7 +56,7 @@ export const admin = new AdminJs({
       {
         authenticate,
         cookiePassword: process.env.COOKIE_PASSWORD,
-        cookieName: "adminjs",
+        cookieName:"adminjs",
       },
       app,
       {

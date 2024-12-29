@@ -9,14 +9,14 @@ import {
 } from "../controllers/order.controller.js";
 
 export const orderRoutes = async (fastify, options) => {
-  fastify.addHook("preHandler", async (req, res) => {
-    const isAuthenticated = await verifyToken(req, res);
-    if (!isAuthenticated) {
-      res.status(401).send({ message: "Unauthorized" });
-    }
-  });
+  // fastify.addHook("preHandler", async (req, res) => {
+  //   const isAuthenticated = await verifyToken(req, res);
+  //   if (!isAuthenticated) {
+  //     res.status(401).send({ message: "Unauthorized" });
+  //   }
+  // });
 
-  fastify.post("/order", createOrder);
+  fastify.post("/order", { preHandler: [verifyToken] }, createOrder);
   fastify.get("/order", getOrders);
   fastify.patch("/order/:orderId/status", updateOrderStatus);
   fastify.post("/order/:orderId/confirm", confirmOrder);

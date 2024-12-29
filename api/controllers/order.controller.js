@@ -4,6 +4,7 @@ export const createOrder = async (req, res) => {
   try {
     const { userId } = req.user;
     const { items, totalPrice } = req.body;
+    
 
     const customerData = await Customer.findById(userId);
    
@@ -15,16 +16,18 @@ export const createOrder = async (req, res) => {
     const newOrder = new Order({
       customer: userId,
       items: items.map((item) => ({
-        id: item.id,
-        item: item.item,
-        count: item.count,
+        id: item._id,
+        item: item._id,
+        count: item.quantity,
       })),
      
       totalPrice,
       
       
     });
+   
     const savedOrder = await newOrder.save();
+    
     return res.status(201).send(savedOrder);
   } catch (error) {
     return res.status(500).send({ message: error.message });
@@ -96,7 +99,8 @@ export const updateOrderStatus = async (req, res) => {
 
 export const getOrders = async (req, res) => {
   try {
-    const { status, customerId,  } = req.query;
+    const { status, customerId } = req.query;
+   
     let query = {};
 
     if (status) {
@@ -105,18 +109,38 @@ export const getOrders = async (req, res) => {
     if (customerId) {
       query.customer = customerId;
     }
-   
 
-    const orders = await Order.find(query).populate(
-      "customer items.item"
-    );
-   
+    const orders = await Order.find(query)
+      .populate({
+        path: 'items.item',
+        select: 'name price', // Include name and price from Product model
+      })
+      .populate('customer', 'name email') // Include customer details if needed
+      .exec();
 
-    return res.status(200).send(orders);
+    // Transform the response to include item prices directly in the items array
+    const formattedOrders = orders.map((order) => ({
+      _id: order._id,
+      orderId: order.orderId,
+      customer: order.customer,
+      items: order.items.map((item) => ({
+        _id: item.id,
+        name: item.item.name,
+        price: item.item.price,
+        quantity: item.count,
+      })),
+      status: order.status,
+      totalPrice: order.totalPrice,
+      createdAt: order.createdAt,
+      updatedAt: order.updatedAt,
+    }));
+
+    return res.status(200).send(formattedOrders);
   } catch (error) {
     return res.status(500).send({ message: error.message });
   }
 };
+
 export const getOrderById = async (req, res) => {
   try {
     const { orderId } = req.params;
