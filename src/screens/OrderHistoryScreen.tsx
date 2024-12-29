@@ -55,8 +55,9 @@ const OrderHistoryScreen: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-      const response = await axios.get(`${BackendUrl}api/order?customerId=${user}`, {
-        params: { customerId: user },
+    
+      const response = await axios.get(`${BackendUrl}api/order?customerId=${user?._id}`, {
+        params: { customerId: user?._id },
       });
       setOrders(response.data);
       setFilteredOrders(response.data);

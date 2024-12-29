@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   ViroARScene,
   ViroMaterials,
@@ -6,51 +6,68 @@ import {
   ViroSpotLight,
   ViroARSceneNavigator,
   ViroAmbientLight,
-  ViroARPlaneSelector,
+  ViroARImageMarker,
+  ViroARTrackingTargets,
+  ViroButton,
 } from '@reactvision/react-viro';
 
 // Define materials
 ViroMaterials.createMaterials({
   grid: {
     lightingModel: 'Lambert',
-    diffuseTexture: require('../assets/stool/wooden_stool_color.png'),
+    diffuseTexture: require('../assets/woodentable/wooden_table_color.png'),
+  },
+});
+
+// Define AR Tracking Targets
+ViroARTrackingTargets.createTargets({
+  markerTarget: {
+    source: require('../assets/woodentable/marker.jpg'),
+    orientation: 'Up',
+    physicalWidth: 2,
   },
 });
 
 const InitialScene = () => {
+  const [scale, setScale] = useState([1, 1, 1]);
+
+  const handlePinch = (pinchState: number, scaleFactor: number) => {
+    if (pinchState === 3) {
+      // Pinch gesture ends
+      setScale(prevScale => prevScale.map(value => value * scaleFactor));
+    }
+  };
+
   return (
     <ViroARScene>
-      {/* Ambient Light for overall illumination */}
       <ViroAmbientLight color="#ffffff" intensity={200} />
 
-      {/* AR Plane Selector to position the stool on a detected plane */}
-      <ViroARPlaneSelector>
-        {/* 3D Object */}
+      <ViroARImageMarker target="markerTarget">
         <Viro3DObject
-          position={[0, 0, 0]} // Relative position on the plane
-          scale={[0.2, 0.2, 0.2]} // Fixed scale
-          source={require('../assets/stool/WoodenStool.obj')}
-          resources={[require('../assets/stool/WoodenStool1.mtl')]}
+          position={[0, 0, 0]}
+          scale={scale}
+          source={require('../assets/woodentable/WoodenTable.obj')}
+          resources={[require('../assets/woodentable/WoodenTable.mtl')]}
           type="OBJ"
           materials={['grid']}
+          onPinch={handlePinch}
         />
-      </ViroARPlaneSelector>
 
-      {/* Spotlight for shadow and highlights */}
-      <ViroSpotLight
-        innerAngle={5}
-        outerAngle={25}
-        direction={[0, -1, 0]}
-        position={[0, 3, 1]}
-        color="#ffffff"
-        castsShadow={true}
-      />
+        <ViroSpotLight
+          innerAngle={5}
+          outerAngle={25}
+          direction={[0, -1, 0]}
+          position={[0, 3, 1]}
+          color="#ffffff"
+          castsShadow={true}
+        />
+      </ViroARImageMarker>
     </ViroARScene>
   );
 };
 
 const ARView = () => {
-  return <ViroARSceneNavigator initialScene={{ scene: InitialScene }} />;
+  return <ViroARSceneNavigator initialScene={{scene: InitialScene}} />;
 };
 
 export default ARView;
