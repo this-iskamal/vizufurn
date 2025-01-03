@@ -12,7 +12,6 @@ import {useRoute, useNavigation, RouteProp} from '@react-navigation/native';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 import {useAuthStore} from '../state/authstore';
 
-// Define interfaces for our data structures
 interface PurchasedItem {
   _id: string;
   name: string;
@@ -21,32 +20,25 @@ interface PurchasedItem {
 }
 
 interface TransactionQueryParams {
-  oid: string;
-  amt: string;
-  refId: string;
-  [key: string]: string; // For any additional parameters
+  [key: string]: string; // For dynamic query parameters
 }
 
-// Define the route params interface
 interface RouteParams {
   transactionDetails: string;
   purchasedItems: PurchasedItem[];
   orderId: string;
 }
 
-// Define the navigation param list type
 type RootStackParamList = {
   MainApp: undefined;
   PaymentSuccess: RouteParams;
 };
 
-// Type the navigation prop
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'PaymentSuccess'
 >;
 
-// Type the route prop
 type PaymentSuccessRouteProp = RouteProp<RootStackParamList, 'PaymentSuccess'>;
 
 const PaymentSuccess: React.FC = () => {
@@ -66,14 +58,34 @@ const PaymentSuccess: React.FC = () => {
         params[decodeURIComponent(key)] = decodeURIComponent(value);
       });
     }
-    return params as TransactionQueryParams;
+    return params;
   };
 
-  const {oid, amt, refId} = getQueryParams(transactionDetails);
+  const queryParams = getQueryParams(transactionDetails);
+  const isEsewa = queryParams.oid !== undefined; // Check if it's eSewa
+  const isKhalti = queryParams.pidx !== undefined; // Check if it's Khalti
 
-  const handleContinueShopping = (): void => {
-    navigation.navigate('MainApp');
-  };
+  const transactionDetailsData = isEsewa
+    ? [
+        {title: 'Reference ID', value: queryParams.refId || 'N/A'},
+        {title: 'Order ID', value: orderId},
+        {title: 'Customer Name', value: user?.name ?? 'N/A'},
+        {title: 'Customer Address', value: user?.address ?? 'N/A'},
+        {title: 'Amount', value: `$${queryParams.amt || '0'}`},
+      ]
+    : isKhalti
+    ? [
+        {title: 'Transaction ID', value: queryParams.purchase_order_id || 'N/A'},
+        {title: 'Order ID', value: orderId || 'N/A'},
+        {title: 'Order Name', value: queryParams.purchase_order_name || 'N/A'},
+        {title: 'Mobile', value: user?.phone || 'N/A'},
+        {
+          title: 'Amount',
+          value: `$${(parseInt(queryParams.amount, 10) / 100).toFixed(2)}`,
+        }, // Convert from paisa
+        {title: 'Status', value: queryParams.status || 'N/A'},
+      ]
+    : [];
 
   const grandTotal: number = purchasedItems.reduce(
     (total: number, item: PurchasedItem) => total + item.price * item.quantity,
@@ -100,14 +112,6 @@ const PaymentSuccess: React.FC = () => {
       </Text>
     </View>
   );
-
-  const transactionDetailsData = [
-    {title: 'Reference ID', value: refId},
-    {title: 'Order ID', value: orderId},
-    {title: 'Customer Name', value: user?.name ?? user},
-    {title: 'Customer Address', value: user?.address ?? 'N/A'},
-    {title: 'Amount', value: `$${amt}`},
-  ];
 
   const renderMainContent: ListRenderItem<{key: string}> = ({item}) => {
     if (item.key === 'transactionDetails') {
@@ -143,6 +147,10 @@ const PaymentSuccess: React.FC = () => {
     }
 
     return null;
+  };
+
+  const handleContinueShopping = (): void => {
+    navigation.navigate('MainApp');
   };
 
   return (

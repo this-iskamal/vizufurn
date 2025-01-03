@@ -16,6 +16,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimilarProducts from '../components/SimilarProducts';
 import {useCartStore} from '../state/cartStore';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { BackendUrl } from '../utils/utils';
 
 type ProductDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -38,6 +39,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const [quantity, setQuantity] = useState(1);
+  const [model, setModel] = useState<any>(null);
 
   useEffect(() => {
     if (route.params?.product) {
@@ -61,6 +63,9 @@ const ProductDetail: FC<ProductDetailProps> = () => {
       });
     }
   };
+
+
+
 
   const increaseQuantity = () => {
     setQuantity(prevQuantity => prevQuantity + 1);
@@ -86,6 +91,27 @@ const ProductDetail: FC<ProductDetailProps> = () => {
       <Image source={{uri: item}} style={styles.fullscreenImage} />
     </View>
   );
+
+  const getModelFromBackend = async () => {
+    try {
+      const response = await fetch(
+        `${BackendUrl}api/getmodels?productId=${product._id}`,
+      );
+      if (!response.ok) throw new Error('Failed to fetch model');
+
+      const models = await response.json();
+      if (models && models.length > 0) {
+        const model = models[0];
+        setProduct(prevProduct => ({...prevProduct, model}));
+      }
+    } catch (error) {
+      console.error('Error fetching model:', error);
+    }
+  };
+
+  useEffect(() => {
+    getModelFromBackend();
+  }, [product._id]);
 
   return (
     <View style={styles.container}>

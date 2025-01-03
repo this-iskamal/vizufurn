@@ -75,3 +75,6 @@ yarn-error.log
 
 
 my-release-key.jks
+
+
+.env

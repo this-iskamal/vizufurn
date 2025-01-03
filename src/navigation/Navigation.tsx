@@ -42,7 +42,7 @@ export type RootStackParamList = {
   MainApp: undefined;
   ProductDetail: {product: Product};
   ARView: {product: Product};
-  Payment: {totalPrice: number; items: Product[]};
+  Payment: {totalPrice: number, items: Product[],method:string};
   PaymentSuccess: {transactionDetails: string; purchasedItems: any,orderId:string};
   PaymentFailure: {errorDetails: string};
   EditProfile: undefined;
