@@ -51,7 +51,7 @@ const PaymentScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
 
-  const esewaURL = 'https://uat.esewa.com.np/epay/main';
+  const esewaURL = 'https://rc-epay.esewa.com.np/';
   const esewaSuccessURL = `${BackendUrl}api/payment-success`;
   const esewaFailureURL = `${BackendUrl}api/payment-failure`;
 

@@ -26,6 +26,7 @@
     "react-native-arcore": "^0.0.1",
     "react-native-dotenv": "^3.4.11",
     "react-native-fs": "^2.20.0",
+    "react-native-make": "^1.0.1",
     "react-native-mmkv": "^3.1.0",
     "react-native-safe-area-context": "^4.14.0",
     "react-native-screens": "^4.3.0",

@@ -6,18 +6,33 @@ import { BackendUrl } from '../utils/utils';
 import { useAuthStore } from '../state/authstore';
 
 interface OrderItem {
-  _id: string;
+  productId: string;
   name: string;
   price: number;
   quantity: number;
 }
 
-interface Order {
-  _id: string;
+interface Seller {
+  sellerId: string;
+  sellerName: string;
+  sellerEmail: string;
   items: OrderItem[];
   totalPrice: number;
+}
+
+interface Order {
+  _id: string;
+  orderId: string;
+  customer: {
+    _id: string;
+    name: string;
+    email: string;
+  };
   status: string;
+  totalPrice: number;
   createdAt: string;
+  updatedAt: string;
+  sellers: Seller[];
 }
 
 interface FilterOptions {
@@ -55,8 +70,7 @@ const OrderHistoryScreen: React.FC = () => {
 
   const fetchOrders = async () => {
     try {
-    
-      const response = await axios.get(`${BackendUrl}api/order?customerId=${user?._id}`, {
+      const response = await axios.get(`${BackendUrl}api/order`, {
         params: { customerId: user?._id },
       });
       setOrders(response.data);
@@ -206,13 +220,38 @@ const OrderHistoryScreen: React.FC = () => {
     </View>
   );
 
+  const renderOrderItems = (sellers: Seller[]) => (
+    <View style={styles.orderDetails}>
+      {sellers.map((seller) => (
+        <View key={seller.sellerId} style={styles.sellerSection}>
+          <Text style={styles.sellerName}>Seller: {seller.sellerName}</Text>
+          <FlatList
+            data={seller.items}
+            keyExtractor={(item) => item.productId}
+            renderItem={({ item }) => (
+              <View style={styles.itemRow}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <View style={styles.itemDetails}>
+                  <Text style={styles.itemQuantity}>×{item.quantity}</Text>
+                  <Text style={styles.itemPrice}>Rs. {item.price.toFixed(2)}</Text>
+                </View>
+              </View>
+            )}
+            scrollEnabled={false}
+          />
+          <Text style={styles.sellerTotal}>Seller Total: Rs. {seller.totalPrice.toFixed(2)}</Text>
+        </View>
+      ))}
+    </View>
+  );
+
   const renderOrderItem = ({ item }: { item: Order }) => {
     const isExpanded = expandedOrderId === item._id;
     return (
       <TouchableOpacity onPress={() => setExpandedOrderId(isExpanded ? null : item._id)}>
         <View style={styles.orderCard}>
           <View style={styles.orderHeader}>
-            <Text style={styles.orderId}>Order ID: {item._id}</Text>
+            <Text style={styles.orderId}>Order ID: {item.orderId}</Text>
             <Text style={styles.orderDate}>
               {new Date(item.createdAt).toLocaleDateString()}
             </Text>
@@ -225,23 +264,7 @@ const OrderHistoryScreen: React.FC = () => {
             </Text>
           </View>
 
-          {isExpanded && (
-            <View style={styles.orderDetails}>
-              <FlatList
-                data={item.items}
-                keyExtractor={(item) => item._id}
-                renderItem={({ item }) => (
-                  <View style={styles.itemRow}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    <View style={styles.itemDetails}>
-                      <Text style={styles.itemQuantity}>×{item.quantity}</Text>
-                      <Text style={styles.itemPrice}>Rs. {item.price.toFixed(2)}</Text>
-                    </View>
-                  </View>
-                )}
-              />
-            </View>
-          )}
+          {isExpanded && renderOrderItems(item.sellers)}
         </View>
       </TouchableOpacity>
     );
@@ -403,9 +426,18 @@ const styles = StyleSheet.create({
   },
   orderDetails: {
     marginTop: 12,
-    paddingTop: 12,
+  },
+  sellerSection: {
+    marginTop: 12,
+    paddingTop: 8,
     borderTopWidth: 1,
     borderTopColor: '#eee',
+  },
+  sellerName: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 8,
   },
   itemRow: {
     flexDirection: 'row',
@@ -432,6 +464,10 @@ const styles = StyleSheet.create({
     color: '#333',
     fontWeight: '600',
   },
+  sellerTotal: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
   loaderContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -439,10 +475,11 @@ const styles = StyleSheet.create({
   },
   noOrdersText: {
     fontSize: 16,
-    color: '#666',
     textAlign: 'center',
-    marginTop: 24,
+    color: '#666',
   },
 });
+
+
 
 export default OrderHistoryScreen;

@@ -1,6 +1,6 @@
 # Blender 3.6.14
 # www.blender.org
-mtllib WoodenTable.mtl
+mtllib object.mtl
 o Wooden_Table.001
 v -1.028252 0.008732 0.640024
 v -1.023798 0.894560 0.635570

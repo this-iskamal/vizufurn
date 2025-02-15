@@ -18,6 +18,7 @@ import { useAuthStore } from '../state/authstore';
 import { tokenStorage } from '../state/Storage';
 import ReusableButton from '../components/ReusableButton'; // Import ReusableButton
 
+
 type LoginScreenProps = NativeStackScreenProps<RootStackParamList, 'Login'>;
 
 const { width, height } = Dimensions.get('window');
@@ -42,6 +43,7 @@ const Login: React.FC<LoginScreenProps> = ({ navigation }) => {
 
         const { setUser } = useAuthStore.getState();
         setUser(customer);
+        
 
         Alert.alert('Success', 'Login Successful');
         navigation.navigate('MainApp');

@@ -33,6 +33,9 @@ interface Product {
   images: string[];
   description?: string;
   category: string;
+  quantity: any;
+  discountPrice?: number;
+  dimension?: any;
 }
 
 export type RootStackParamList = {

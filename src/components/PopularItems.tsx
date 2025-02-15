@@ -67,10 +67,8 @@ const PopularItems: FC = () => {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Popular</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See All →</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>Furnitures</Text>
+       
       </View>
       <FlatList
         data={products}

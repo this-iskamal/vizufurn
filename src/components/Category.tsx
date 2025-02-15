@@ -46,9 +46,7 @@ const Category: FC = () => {
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.title}>Categories</Text>
-        <TouchableOpacity>
-          <Text style={styles.seeAll}>See all →</Text>
-        </TouchableOpacity>
+       
       </View>
       <FlatList
         horizontal

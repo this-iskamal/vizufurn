@@ -15,8 +15,10 @@ import {RootStackParamList} from '../navigation/Navigation';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import SimilarProducts from '../components/SimilarProducts';
 import {useCartStore} from '../state/cartStore';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { BackendUrl } from '../utils/utils';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+import {BackendUrl} from '../utils/utils';
+import ReviewSection from '../components/ReviewSection';
+import {useAuthStore} from '../state/authstore';
 
 type ProductDetailScreenRouteProp = RouteProp<
   RootStackParamList,
@@ -40,6 +42,10 @@ const ProductDetail: FC<ProductDetailProps> = () => {
   const flatListRef = useRef<FlatList>(null);
   const [quantity, setQuantity] = useState(1);
   const [model, setModel] = useState<any>(null);
+  const user = useAuthStore(state => state.user);
+
+  const isInStock = parseInt(product.quantity) >= 1;
+  const dimensions = product.dimension.split(' x ');
 
   useEffect(() => {
     if (route.params?.product) {
@@ -63,9 +69,6 @@ const ProductDetail: FC<ProductDetailProps> = () => {
       });
     }
   };
-
-
-
 
   const increaseQuantity = () => {
     setQuantity(prevQuantity => prevQuantity + 1);
@@ -113,6 +116,14 @@ const ProductDetail: FC<ProductDetailProps> = () => {
     getModelFromBackend();
   }, [product._id]);
 
+  const camerabutton = (product:any)=>{
+    if(product.model){
+      navigation.navigate('ARView', {product})
+    }else{
+      Alert.alert("Currently we dont have this model")
+    }
+  }
+
   return (
     <View style={styles.container}>
       <FlatList
@@ -124,37 +135,93 @@ const ProductDetail: FC<ProductDetailProps> = () => {
               <Image source={{uri: product.images[0]}} style={styles.image} />
               <TouchableOpacity
                 style={styles.backButton}
-                onPress={() =>
-                  navigation.reset({routes: [{name: 'MainApp' as never}]})
-                }>
+                onPress={() => navigation.reset({routes: [{name: 'MainApp'}]})}>
                 <Ionicons name="home" size={24} color="white" />
               </TouchableOpacity>
             </View>
 
             <View style={[styles.detailContainer, styles.roundedTop]}>
               <Text style={styles.name}>{product.name}</Text>
-              <Text style={styles.price}>Rs {product.price}</Text>
+
+              <View style={styles.priceContainer}>
+                <Text
+                  style={[
+                    styles.price,
+                    product.discountPrice > 0 && styles.strikethrough,
+                  ]}>
+                  Rs {product.price}
+                </Text>
+                {product.discountPrice && product.discountPrice > 0 ? (
+                  <View style={styles.discountBadge}>
+                    <Text style={styles.finalPrice}>
+                      Rs {product.price - product.discountPrice}
+                    </Text>
+                    <View style={styles.discountContainer}>
+                      <Text style={styles.discountPercentage}>
+                        {Math.round(
+                          (product.discountPrice / product.price) * 100,
+                        )}
+                        % OFF
+                      </Text>
+                      <Text style={styles.discountAmount}>
+                        Save Rs {product.discountPrice}
+                      </Text>
+                    </View>
+                  </View>
+                ):<></>}
+              </View>
 
               <View style={styles.ratingContainer}>
-                <Ionicons name="star" size={16} color="gold" />
+                {/* <Ionicons name="star" size={16} color="gold" />
                 <Text style={styles.rating}>4.6</Text>
-                <Text style={styles.reviewCount}>98 Reviews</Text>
+                <Text style={styles.reviewCount}>98 Reviews</Text> */}
+                <View style={styles.stockIndicator}>
+                  <Ionicons
+                    name={isInStock ? 'checkmark-circle' : 'close-circle'}
+                    size={16}
+                    color={isInStock ? 'green' : 'red'}
+                  />
+                  <Text
+                    style={[
+                      styles.stockText,
+                      {color: isInStock ? 'green' : 'red'},
+                    ]}>
+                    {isInStock
+                      ? `In Stock (${product.quantity})`
+                      : 'Out of Stock'}
+                  </Text>
+                </View>
               </View>
+
               <Text style={styles.description}>{product.description}</Text>
+
+              <View style={styles.dimensionsContainer}>
+                <Text style={styles.sectionTitle}>Dimensions (mm)</Text>
+                <View style={styles.dimensionRow}>
+                  <Text style={styles.dimensionText}>L: {dimensions[0]}</Text>
+                  <Text style={styles.dimensionText}>W: {dimensions[1]}</Text>
+                  <Text style={styles.dimensionText}>H: {dimensions[2]}</Text>
+                </View>
+              </View>
 
               <Text style={styles.sectionTitle}>Product Images</Text>
               <View style={styles.imageRow}>
-                {product.images
-                  .slice(0, 3)
-                  .map((image: string, index: number) => (
-                    <TouchableOpacity
-                      key={index}
-                      onPress={() => openGallery(index)}>
-                      <Image source={{uri: image}} style={styles.thumbnail} />
-                    </TouchableOpacity>
-                  ))}
+                {product.images.slice(0, 3).map((image, index) => (
+                  <TouchableOpacity
+                    key={index}
+                    onPress={() => {
+                      setCurrentIndex(index);
+                      setShowGallery(true);
+                    }}>
+                    <Image source={{uri: image}} style={styles.thumbnail} />
+                  </TouchableOpacity>
+                ))}
                 {product.images.length > 3 && (
-                  <TouchableOpacity onPress={() => openGallery(3)}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      setCurrentIndex(3);
+                      setShowGallery(true);
+                    }}>
                     <View style={styles.seeMoreButton}>
                       <Text style={styles.seeMoreText}>See More</Text>
                     </View>
@@ -166,27 +233,35 @@ const ProductDetail: FC<ProductDetailProps> = () => {
                 <View style={styles.quantityContainer}>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={decreaseQuantity}>
+                    onPress={() => setQuantity(prev => Math.max(1, prev - 1))}>
                     <Ionicons name="remove" size={20} color="tomato" />
                   </TouchableOpacity>
                   <Text style={styles.quantityText}>{quantity}</Text>
                   <TouchableOpacity
                     style={styles.quantityButton}
-                    onPress={increaseQuantity}>
+                    onPress={() => setQuantity(prev => prev + 1)}>
                     <Ionicons name="add" size={20} color="tomato" />
                   </TouchableOpacity>
                 </View>
                 <TouchableOpacity
-                  style={styles.addToCartButtonContainer}
-                  onPress={handleAddToCart}>
+                  style={[
+                    styles.addToCartButtonContainer,
+                    !isInStock && styles.disabledButton,
+                  ]}
+                  onPress={handleAddToCart}
+                  disabled={!isInStock}>
                   <Text style={styles.addToCartText}>Add to Cart</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.cameraIconButton}
-                  onPress={() => navigation.navigate('ARView', {product})}>
+                  onPress={()=>camerabutton(product)}>
                   <Ionicons name="camera" size={24} color="white" />
                 </TouchableOpacity>
               </View>
+              <ReviewSection
+                productId={product._id}
+                currentUserId={user?._id}
+              />
             </View>
           </>
         }
@@ -205,7 +280,7 @@ const ProductDetail: FC<ProductDetailProps> = () => {
         <View style={styles.galleryModal}>
           <TouchableOpacity
             style={styles.modalCloseButton}
-            onPress={closeGallery}>
+            onPress={() => setShowGallery(false)}>
             <Ionicons name="close" size={28} color="white" />
           </TouchableOpacity>
           <FlatList
@@ -221,15 +296,6 @@ const ProductDetail: FC<ProductDetailProps> = () => {
               offset: width * index,
               index,
             })}
-            onScrollToIndexFailed={info => {
-              console.warn('Scroll to index failed:', info);
-              setTimeout(() => {
-                flatListRef.current?.scrollToIndex({
-                  index: info.index,
-                  animated: true,
-                });
-              }, 100);
-            }}
           />
         </View>
       </Modal>
@@ -241,6 +307,74 @@ const styles = StyleSheet.create({
   container: {flex: 1, backgroundColor: 'white'},
   imageContainer: {width: '100%', height: 300, position: 'relative'},
   image: {width: '100%', height: '100%', resizeMode: 'cover'},
+  priceRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  priceContainer: {
+    marginVertical: 10,
+  },
+  price: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'tomato',
+  },
+  strikethrough: {
+    textDecorationLine: 'line-through',
+    color: '#666',
+    fontSize: 16,
+  },
+  discountBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  finalPrice: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#E53935',
+    marginRight: 10,
+  },
+  discountContainer: {
+    backgroundColor: '#FFF0E0',
+    padding: 8,
+    borderRadius: 8,
+  },
+  discountPercentage: {
+    color: '#E53935',
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  discountAmount: {
+    color: '#E53935',
+    fontSize: 12,
+    marginTop: 2,
+  },
+  stockIndicator: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 'auto',
+  },
+  stockText: {
+    marginLeft: 4,
+    fontSize: 14,
+    fontWeight: 'bold',
+  },
+  dimensionsContainer: {
+    marginVertical: 16,
+  },
+  dimensionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 8,
+  },
+  dimensionText: {
+    fontSize: 14,
+    color: '#666',
+  },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
   backButton: {
     position: 'absolute',
     top: 16,

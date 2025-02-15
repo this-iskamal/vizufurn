@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ViroARScene,
   ViroMaterials,
@@ -8,12 +8,22 @@ import {
   ViroAmbientLight,
   ViroARImageMarker,
   ViroARTrackingTargets,
-  ViroButton,
 } from '@reactvision/react-viro';
 
 
+const assetMap = {
+  BedTable: {
+    obj: require('../assets/BedTable/object.obj'),
+    mtl: require('../assets/BedTable/object.mtl'),
+    texture: require('../assets/BedTable/texture.png'),
+  },
+  WoodenStool: {
+    obj: require('../assets/WoodenStool/object.obj'),
+    mtl: require('../assets/WoodenStool/object.mtl'),
+    texture: require('../assets/WoodenStool/texture.png'),
+  }, 
+};
 
-// Define materials
 ViroMaterials.createMaterials({
   grid: {
     lightingModel: 'Lambert',
@@ -21,56 +31,63 @@ ViroMaterials.createMaterials({
   },
 });
 
-// Define AR Tracking Targets
+
 ViroARTrackingTargets.createTargets({
   markerTarget: {
-    source: require('../assets/woodentable/marker.jpg'),
+    source: require('../assets/WoodenStool/marker.jpg'),
     orientation: 'Up',
     physicalWidth: 2,
   },
 });
 
-const InitialScene = ({productModel}) => {
+const InitialScene = ({ productModel }) => {
   const [scale, setScale] = useState([1, 1, 1]);
-  const [isTextureLoaded, setIsTextureLoaded] = useState(false);
+  const productName = productModel.product.name.replace(/\s+/g, '');
+  
+ 
+  const productAssets = assetMap[productName];
+
   useEffect(() => {
-    // Dynamically set the diffuse texture material after the model is loaded
-    if (productModel.materialFile) {
+    
       ViroMaterials.createMaterials({
         grid: {
           lightingModel: 'Lambert',
-          diffuseTexture: { uri: productModel.materialFile }, // Set the material file dynamically
+          diffuseTexture: productAssets.texture,
         },
       });
-      setIsTextureLoaded(true);
-    }
-  }, [productModel.materialFile]);
+
+   
+    
+  }, [productAssets]);
 
   const handlePinch = (pinchState, scaleFactor) => {
     if (pinchState === 3) {
-      // Pinch gesture ends
-      setScale(prevScale => prevScale.map(value => value * scaleFactor));
+      setScale((prevScale) => prevScale.map((value) => value * scaleFactor));
     }
   };
+
+  if (!productAssets) {
+    console.error(`Assets for product "${productName}" not found.`);
+    return null;
+  }
 
   return (
     <ViroARScene>
       <ViroAmbientLight color="#ffffff" intensity={200} />
 
       <ViroARImageMarker target="markerTarget">
-      {isTextureLoaded &&
         <Viro3DObject
           position={[0, 0, 0]}
           scale={scale}
-          source={{uri: productModel.objFile}} // Use URI from the route data
+          source={productAssets.obj} // Use preloaded OBJ file
           resources={[
-            {uri: productModel.mtlFile},
-            {uri: productModel.materialFile},
-          ]} // Use URI for the MTL and texture files
+            productAssets.mtl, // Use preloaded MTL file
+            productAssets.texture, // Use preloaded texture file
+          ]}
           type="OBJ"
           materials={['grid']}
           onPinch={handlePinch}
-        />}
+        />
 
         <ViroSpotLight
           innerAngle={5}
@@ -85,15 +102,14 @@ const InitialScene = ({productModel}) => {
   );
 };
 
-const ARView = ({route}) => {
-  const {product} = route.params;
-  const {model} = product;
- ;
+const ARView = ({ route }) => {
+  const { product } = route.params;
+  const { model } = product;
 
   return (
     <ViroARSceneNavigator
       initialScene={{
-        scene: () => <InitialScene productModel={model} />, // Pass model data as props to InitialScene
+        scene: () => <InitialScene productModel={model} />,
       }}
     />
   );
