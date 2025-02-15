@@ -11,24 +11,31 @@ const orderSchema = new mongoose.Schema({
     ref: "Customer",
     required: true,
   },
-
-
-  items: [
+  sellers: [
     {
-      id: {
+      sellerId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
+        ref: "Seller",
         required: true,
       },
-      item: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true,
-      },
-      count: { type: Number, required: true },
+      items: [
+        {
+          id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+          },
+          item: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
+          },
+          count: { type: Number, required: true },
+        },
+      ],
+      totalPrice: { type: Number, required: true },
     },
   ],
-
   status: {
     type: String,
     enum: ["available", "confirmed", "arriving", "delivered", "cancelled"],
@@ -64,7 +71,6 @@ orderSchema.pre("save", async function (next) {
   }
   next();
 });
-
 
 const Order = mongoose.model("Order", orderSchema);
 

@@ -9,6 +9,22 @@ export const getAllProducts = async (req, res) => {
   }
 };
 
+export const getProductById = async (req, res) => {
+  try {
+    const { productId } = req.params; // Get product ID from request parameters
+    const product = await Product.findById(productId) // Find product by ID
+
+    if (!product) {
+      return res.status(404).send({ message: "Product not found" });
+    }
+
+    return res.status(200).send(product); // Return the found product
+  } catch (error) {
+    return res.status(500).send({ message: error.message });
+  }
+};
+
+
 export const getProductByCategoryId = async (req, res) => {
   const { categoryId } = req.params;
   
@@ -37,7 +53,7 @@ export const searchProducts = async (req, res) => {
     const products = await Product.find({
       $or: [
         { name: regex },         // Matches product names
-        { description: regex },  // Matches product descriptions
+        // { description: regex },  // Matches product descriptions
       ],
     }).exec();
 
